@@ -3,7 +3,6 @@ package com.example.restaurantguide
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
@@ -17,8 +16,10 @@ class RestaurantListActivity : AppCompatActivity() {
     private var searchJob: Job? = null
 
     private val adapter = RestaurantAdapter { item ->
-        // The details screen is built in stage 5
-        Toast.makeText(this, item.restaurant.name, Toast.LENGTH_SHORT).show()
+        startActivity(
+            Intent(this, RestaurantDetailActivity::class.java)
+                .putExtra(EXTRA_RESTAURANT_ID, item.restaurant.id)
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
