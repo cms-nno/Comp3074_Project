@@ -1,6 +1,8 @@
 package com.example.restaurantguide
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -14,7 +16,9 @@ class RestaurantDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRestaurantDetailBinding
     private var restaurantId = -1L
-    private var current: Restaurant? = null
+    private var currentItem: RestaurantWithRating? = null
+    private var currentReviews: List<Review> = emptyList()
+    private val current: Restaurant? get() = currentItem?.restaurant
 
     private val reviewAdapter = ReviewAdapter { row -> confirmDeleteReview(row) }
 
@@ -32,6 +36,8 @@ class RestaurantDetailActivity : AppCompatActivity() {
 
         binding.rvReviews.adapter = reviewAdapter
         binding.btnMap.setOnClickListener { openMap() }
+        binding.btnEmail.setOnClickListener { shareByEmail() }
+        binding.btnShare.setOnClickListener { shareWithApps() }
         binding.btnEdit.setOnClickListener {
             startActivity(
                 Intent(this, AddEditRestaurantActivity::class.java)
@@ -56,8 +62,8 @@ class RestaurantDetailActivity : AppCompatActivity() {
                 finish()
                 return@launch
             }
+            currentItem = item
             val r = item.restaurant
-            current = r
             binding.tvName.text = r.name
             binding.tvRating.text = ratingLabel(item.avgRating, item.reviewCount)
             binding.tvTags.text = tagsLabel(r.tags)
@@ -65,6 +71,7 @@ class RestaurantDetailActivity : AppCompatActivity() {
             binding.tvDescription.text = r.description
 
             val reviews = db.reviewDao().forRestaurant(restaurantId)
+            currentReviews = reviews
             reviewAdapter.submitList(reviews.map { it.toRow() })
             binding.tvNoReviews.visibility = if (reviews.isEmpty()) View.VISIBLE else View.GONE
         }
@@ -88,6 +95,53 @@ class RestaurantDetailActivity : AppCompatActivity() {
                 .putExtra(EXTRA_LNG, lng)
                 .putExtra(EXTRA_NAME, r.name)
         )
+    }
+
+    // The text that goes into the email or the share sheet
+    private fun buildShareText(item: RestaurantWithRating): String = buildString {
+        val r = item.restaurant
+        append("Check out ${r.name}!\n")
+        append(ratingLabel(item.avgRating, item.reviewCount)).append("\n")
+        append(r.address).append("\n")
+        val tags = tagsLabel(r.tags)
+        if (tags.isNotEmpty()) append(tags).append("\n")
+        if (r.description.isNotBlank()) append("\n").append(r.description).append("\n")
+        if (currentReviews.isNotEmpty()) {
+            append("\nRecent reviews:\n")
+            currentReviews.take(3).forEach {
+                append("${starsText(it.rating)} ${it.comment}".trim()).append("\n")
+            }
+        }
+        val lat = r.latitude
+        val lng = r.longitude
+        if (lat != null && lng != null) {
+            append("\nMap: https://www.google.com/maps/search/?api=1&query=$lat,$lng\n")
+        }
+        append("\nShared from The Restaurant Guide")
+    }
+
+    private fun shareByEmail() {
+        val item = currentItem ?: return
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_SUBJECT, "Restaurant recommendation: ${item.restaurant.name}")
+            putExtra(Intent.EXTRA_TEXT, buildShareText(item))
+        }
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "No email app found on this device", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun shareWithApps() {
+        val item = currentItem ?: return
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "Restaurant recommendation: ${item.restaurant.name}")
+            putExtra(Intent.EXTRA_TEXT, buildShareText(item))
+        }
+        startActivity(Intent.createChooser(send, "Share restaurant"))
     }
 
     private fun submitReview() {
