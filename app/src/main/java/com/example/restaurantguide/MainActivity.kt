@@ -1,13 +1,12 @@
 package com.example.restaurantguide
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.TextView
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,13 +19,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Temporary database test (removed in stage 6)
-        val tv = findViewById<TextView>(R.id.tvHello)
-        lifecycleScope.launch {
-            val list = AppDatabase.get(this@MainActivity).restaurantDao().search("")
-            tv.text = list.joinToString("\n") {
-                "${it.restaurant.name}  ★${"%.1f".format(it.avgRating)} (${it.reviewCount})"
-            }
+        // Temporary: opens the list until the real Home screen exists (stage 6)
+        findViewById<Button>(R.id.btnRestaurants).setOnClickListener {
+            startActivity(Intent(this, RestaurantListActivity::class.java))
         }
     }
 }
