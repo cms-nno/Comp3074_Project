@@ -12,6 +12,9 @@ import java.util.Locale
 // Keys used to pass data between screens
 const val EXTRA_RESTAURANT_ID = "restaurant_id"
 const val EXTRA_QUERY = "query"
+const val EXTRA_LAT = "lat"
+const val EXTRA_LNG = "lng"
+const val EXTRA_NAME = "name"
 
 // "★ 4.5  (2 reviews)" or "No ratings yet"
 fun ratingLabel(avg: Double, count: Int): String =

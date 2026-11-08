@@ -31,6 +31,7 @@ class RestaurantDetailActivity : AppCompatActivity() {
         }
 
         binding.rvReviews.adapter = reviewAdapter
+        binding.btnMap.setOnClickListener { openMap() }
         binding.btnEdit.setOnClickListener {
             startActivity(
                 Intent(this, AddEditRestaurantActivity::class.java)
@@ -67,6 +68,26 @@ class RestaurantDetailActivity : AppCompatActivity() {
             reviewAdapter.submitList(reviews.map { it.toRow() })
             binding.tvNoReviews.visibility = if (reviews.isEmpty()) View.VISIBLE else View.GONE
         }
+    }
+
+    private fun openMap() {
+        val r = current ?: return
+        val lat = r.latitude
+        val lng = r.longitude
+        if (lat == null || lng == null) {
+            Toast.makeText(
+                this,
+                "No map location for this restaurant. Edit it and check the address.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+        startActivity(
+            Intent(this, MapActivity::class.java)
+                .putExtra(EXTRA_LAT, lat)
+                .putExtra(EXTRA_LNG, lng)
+                .putExtra(EXTRA_NAME, r.name)
+        )
     }
 
     private fun submitReview() {

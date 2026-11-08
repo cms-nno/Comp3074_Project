@@ -37,6 +37,10 @@
             android:label="Add Restaurant"
             android:parentActivityName=".RestaurantListActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
+            android:name=".MapActivity"
+            android:label="Restaurant Location"
+            android:parentActivityName=".RestaurantDetailActivity" />
     </application>
 
 </manifest>
