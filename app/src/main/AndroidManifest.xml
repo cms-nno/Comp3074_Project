@@ -28,6 +28,11 @@
             android:name=".RestaurantListActivity"
             android:label="Restaurants"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".AddEditRestaurantActivity"
+            android:label="Add Restaurant"
+            android:parentActivityName=".RestaurantListActivity"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

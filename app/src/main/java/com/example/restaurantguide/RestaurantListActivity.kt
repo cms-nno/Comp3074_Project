@@ -1,5 +1,6 @@
 package com.example.restaurantguide
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -24,10 +25,14 @@ class RestaurantListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRestaurantListBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySystemBarPadding(binding.root)
 
         binding.rvRestaurants.adapter = adapter
         binding.etSearch.setText(intent.getStringExtra(EXTRA_QUERY).orEmpty())
         binding.etSearch.doAfterTextChanged { loadRestaurants() }
+        binding.btnAdd.setOnClickListener {
+            startActivity(Intent(this, AddEditRestaurantActivity::class.java))
+        }
     }
 
     override fun onResume() {
